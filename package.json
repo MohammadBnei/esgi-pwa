@@ -1,0 +1,26 @@
+{
+  "name": "iw3-todo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "database": "npx json-server --watch ./data/database.json -H 0.0.0.0",
+    "serve": "npx es-dev-server --app-index index.html --node-resolve --watch -p 8080 -h 0.0.0.0",
+    "css": "npx tailwindcss build ./assets/styles/tailwind-import.css -o ./assets/styles/tailwind.css",
+    "start": "npm run database & npm run serve & npm run css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "es-dev-server": "^1.53.0",
+    "json-server": "^0.16.1",
+    "tailwindcss": "^1.4.6"
+  },
+  "dependencies": {
+    "idb": "^5.0.4",
+    "lit-html": "^1.2.1",
+    "lit-icon": "^1.0.0",
+    "page": "^1.11.6"
+  }
+}

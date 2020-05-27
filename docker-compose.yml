@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  esgi-pwa:
+    image: esgi-pwa
+    container_name: esgi-pwa
+    build: .
+    ports:
+      - "3000:3000"
+      - "8080:8080"
+    volumes: 
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    stdin_open: true
+    # entrypoint: "sh -c 'npm run database & npm run serve & npm run css'"
