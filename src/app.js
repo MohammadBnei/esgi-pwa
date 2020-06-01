@@ -6,6 +6,22 @@ import * as eventsConstants from './event/eventConstant.js';
 
 const app = document.querySelector('#app .outlet');
 
+window.addEventListener('load', () => {
+  if (!('serviceWorker' in navigator)) {
+    console.log('service workers not supported 😣')
+    return
+  }
+
+  navigator.serviceWorker.register('/service-worker.js').then(
+    () => {
+      console.log('registered! 👍🏼')
+    },
+    err => {
+      console.error('SW registration failed! 😱', err)
+    }
+  )
+})
+
 fetch('/config.json')
   .then((result) => result.json())
   .then(async (config) => {
