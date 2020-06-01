@@ -10,8 +10,12 @@ export default class Home {
       todo: '',
       todos: []
     };
+    this.state = {
+      edit: false
+    }
 
     this.renderView();
+
   }
 
   set todos(value) {
@@ -23,6 +27,11 @@ export default class Home {
     return this.properties.todos;
   }
 
+  toggleEdit = e => {
+    this.state.edit = !this.state.edit
+    this.renderView()
+  }
+
   template() {
     return html`
       <section class="h-full">
@@ -31,10 +40,13 @@ export default class Home {
             <h1 class="mt-2 px-4 text-xl">My awesome todos : </h1>
           </header>
           <main class="todolist px-4 pb-20">
-            <ul>
-              ${this.properties.todos.map(todo => todoCard(todo))}
-            </ul>
+          <div class="control-btn">
+            <button @click=${this.toggleEdit}>${this.state.edit ? 'View' : 'Edit'}</button>
             <button @click=${() => syncTodos()}>sync</button>
+          </div>
+            <ul>
+              ${this.properties.todos.map(todo => this.todoCard(todo))}
+            </ul>
           </main>
         </div>
         <div class="mt-8" ?hidden="${!!this.properties.todos.length}">
@@ -102,38 +114,69 @@ export default class Home {
     const event = new CustomEvent(CREATE_TODO, { detail: todo });
     window.dispatchEvent(event);
   }
-}
 
-const todoCard = todo => {
+  todoCard = todo => {
 
-  const handleCheckbox = () => {
-    const updatedTodo = { ...todo, done: todo.done === 'true' ? 'false' : 'true', updated: 'true' }
-    const event = new CustomEvent(UPDATE_TODO, { detail: updatedTodo });
-    window.dispatchEvent(event);
+    const handleCheckbox = () => {
+      const updatedTodo = { ...todo, done: todo.done === 'true' ? 'false' : 'true', updated: 'true' }
+      const event = new CustomEvent(UPDATE_TODO, { detail: updatedTodo });
+      window.dispatchEvent(event);
+    }
+
+    const handleDelete = () => {
+      const event = new CustomEvent(DELETE_TODO, { detail: todo.id });
+      window.dispatchEvent(event);
+    }
+
+    const handleSave = () => {
+      const updatedTodo = {
+        ...todo,
+        title: document.getElementById(`title-${todo.id}`).value,
+        description: document.getElementById(`description-${todo.id}`).value
+      }
+
+      let noChange = todo.title === updatedTodo.title && todo.description === updatedTodo.description
+
+      if (noChange) return;
+
+      const event = new CustomEvent(UPDATE_TODO, { detail: updatedTodo });
+      window.dispatchEvent(event);
+    }
+
+    const template = html`
+    <div class='todo'>
+      <h1>${todo.title}</h1>
+      <p>${todo.description}</p>
+      <input type="checkbox" @click=${handleCheckbox}>
+      <button class="delete-btn" @click=${handleDelete}>X</button>
+    </div>
+  `
+
+    const templateChecked = html`
+    <div class='todo'>
+      <h1>${todo.title}</h1>
+      <p>${todo.description}</p>
+      <input type="checkbox" @click=${handleCheckbox} checked>
+      <button class="delete-btn" @click=${handleDelete}>X</button>
+    </div>
+  `
+
+    const templateEdit = html`
+    <div class='todo-edit'>
+      <div>
+        Title : 
+        <input type="text" value=${todo.title || ''} id="title-${todo.id}"/>
+      </div>
+    <div>
+      Description : 
+        <input type="text" value=${todo.description || ''} id="description-${todo.id}"/>
+      </div>
+      <button class="save-btn" @click=${handleSave}>Save</button>
+    </div>
+  `
+
+    if (this.state.edit) return templateEdit
+
+    return todo.done === 'true' ? templateChecked : template
   }
-
-  const handleDelete = () => {
-    const event = new CustomEvent(DELETE_TODO, { detail: todo.id });
-    window.dispatchEvent(event);
-  }
-
-  const template = html`
-  <div>
-    <h1>${todo.title}</h1>
-    <p>${todo.description}</p>
-    <input type="checkbox" @click=${handleCheckbox}>
-    <div @click=${handleDelete}>X</div>
-  </div>
-`
-
-  const templateChecked = html`
-  <div>
-    <h1>${todo.title}</h1>
-    <p>${todo.description}</p>
-    <input type="checkbox" @click=${handleCheckbox} checked>
-    <div @click=${handleDelete}>X</div>
-  </div>
-`
-
-  return todo.done === 'true' ? templateChecked : template
 }
