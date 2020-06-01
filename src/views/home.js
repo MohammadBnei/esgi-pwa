@@ -84,7 +84,7 @@ export default class Home {
       synced: 'false',
       updated: 'false',
       done: 'false',
-      delete: 'false',
+      deleted: 'false',
       date: Date.now()
     };
 
@@ -104,18 +104,36 @@ export default class Home {
   }
 }
 
-const todoCard = todo => html`
+const todoCard = todo => {
+
+  const handleCheckbox = () => {
+    const updatedTodo = { ...todo, done: todo.done === 'true' ? 'false' : 'true', updated: 'true' }
+    const event = new CustomEvent(UPDATE_TODO, { detail: updatedTodo });
+    window.dispatchEvent(event);
+  }
+
+  const handleDelete = () => {
+    const event = new CustomEvent(DELETE_TODO, { detail: todo.id });
+    window.dispatchEvent(event);
+  }
+
+  const template = html`
   <div>
     <h1>${todo.title}</h1>
     <p>${todo.description}</p>
-    <input type="checkbox" value=${todo.done} @click=${() => {
-    const updatedTodo = { ...todo, done: !todo.done, updated: 'true' }
-    const event = new CustomEvent(UPDATE_TODO, { detail: updatedTodo });
-    window.dispatchEvent(event);
-  }}>
-    <div @click=${() => {
-    const event = new CustomEvent(DELETE_TODO, { detail: todo.id });
-    window.dispatchEvent(event);
-  }}>X</div>
+    <input type="checkbox" @click=${handleCheckbox}>
+    <div @click=${handleDelete}>X</div>
   </div>
 `
+
+  const templateChecked = html`
+  <div>
+    <h1>${todo.title}</h1>
+    <p>${todo.description}</p>
+    <input type="checkbox" @click=${handleCheckbox} checked>
+    <div @click=${handleDelete}>X</div>
+  </div>
+`
+
+  return todo.done === 'true' ? templateChecked : template
+}

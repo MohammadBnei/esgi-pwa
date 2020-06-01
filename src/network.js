@@ -16,7 +16,6 @@ export default function checkConnectivity({ url = 'https://www.google.com/images
   }
 
   window.addEventListener('online', () => {
-    console.log('uesh')
     changeConnectivity(true)
   });
   window.addEventListener('offline', () => timeoutFallback(threshold));

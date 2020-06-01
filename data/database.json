@@ -1,40 +1,13 @@
 {
   "todos": [
     {
-      "id": 1590969828275,
-      "title": "test 1 ",
+      "id": 1591036633730,
+      "title": "test again",
       "synced": "true",
       "updated": "false",
-      "done": true,
-      "delete": "false",
-      "date": 1590969828275
-    },
-    {
-      "id": 1590974692007,
-      "title": "on fait quoi ?",
-      "synced": "true",
-      "updated": "false",
-      "done": "false",
-      "delete": "false",
-      "date": 1590974692007
-    },
-    {
-      "id": 1590974804373,
-      "title": "oh",
-      "synced": "true",
-      "updated": "false",
-      "done": "false",
-      "delete": "false",
-      "date": 1590974804373
-    },
-    {
-      "id": 1590974756598,
-      "title": "uesh",
-      "synced": "true",
-      "updated": "false",
-      "done": "false",
-      "delete": "false",
-      "date": 1590974756598
+      "done": "true",
+      "deleted": "false",
+      "date": 1591036633730
     }
   ]
 }

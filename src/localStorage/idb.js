@@ -23,7 +23,7 @@ export async function initDB() {
 
 export async function getTodos() {
   const db = await initDB();
-  return db.getAllFromIndex('todos', 'date');
+  return db.getAllFromIndex('todos', 'id');
 }
 
 export async function setTodos(data) {

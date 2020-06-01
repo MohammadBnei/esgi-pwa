@@ -21,8 +21,7 @@ fetch('/config.json')
 
       let todos = [];
       if (navigator.onLine) {
-        await syncTodos()
-        todos = await fetchTodos();
+        todos = await syncTodos();
       } else {
         todos = await getTodos() || [];
       }

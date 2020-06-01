@@ -29,7 +29,6 @@ export default function () {
                     await updateTodoSync(todo)
                 } catch (error) {
                     todo.updated = 'true'
-                    todo.synced = 'false'
                     console.error(error)
                 }
             }
@@ -45,10 +44,11 @@ export default function () {
                     await deleteTodoSync(detail)
                     await removeTodo(detail)
                 } catch (error) {
-                    const todo = { id: detail, deleted: true }
-                    await addTodo(todo)
                     console.error(error)
                 }
+            } else {
+                const todo = { id: detail, deleted: 'true' }
+                await addTodo(todo)
             }
             window.dispatchEvent(new CustomEvent(UPDATE_TODOS))
         })()
