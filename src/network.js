@@ -1,3 +1,5 @@
+import { CONNECTION_UP } from "./event/eventConstant";
+
 const image = new Image();
 let tStart = null;
 let tEnd = null;
@@ -5,7 +7,7 @@ let abortFallback = false;
 let counter = 0;
 let arrTimes = [];
 
-export default function checkConnectivity({ url = 'https://www.google.com/images/phd/px.gif', timeToCount = 3, threshold = 3000, interval = 10000 }) {
+export default function checkConnectivity({ url = 'https://www.google.com/images/phd/px.gif', timeToCount = 3, threshold = 3000, interval = 10000 }) {
   reset();
   if (navigator.onLine) {
     changeConnectivity(true);
@@ -13,7 +15,10 @@ export default function checkConnectivity({ url = 'https://www.google.com/image
     timeoutFallback(threshold);
   }
 
-  window.addEventListener('online', () => changeConnectivity(true));
+  window.addEventListener('online', () => {
+    console.log('uesh')
+    changeConnectivity(true)
+  });
   window.addEventListener('offline', () => timeoutFallback(threshold));
 
   timeoutFallback(threshold);
@@ -29,7 +34,7 @@ function checkLatencty(url, timeToCount, threshold, cb) {
   tStart = Date.now();
   if (counter < timeToCount) {
     image.src = `${url}?t=${tStart}`;
-    image.onload = function() {
+    image.onload = function () {
       abortFallback = true;
       tEnd = Date.now();
       const time = tEnd - tStart;
@@ -37,7 +42,7 @@ function checkLatencty(url, timeToCount, threshold, cb) {
       counter++;
       checkLatencty(url, timeToCount, threshold, cb);
     };
-    image.onerror = function() {
+    image.onerror = function () {
       abortFallback = false;
     };
   } else {
@@ -53,10 +58,10 @@ function handleLatency(avg, threshold) {
 }
 
 function changeConnectivity(state) {
-  const event = new CustomEvent('connection-changed', {
-    detail: state
-  });
-  document.dispatchEvent(event);
+  const event = new CustomEvent(CONNECTION_UP);
+
+  if (state)
+    window.dispatchEvent(event);
 }
 
 function timeoutFallback(threshold) {

@@ -36,7 +36,25 @@ export async function setTodos(data) {
   return await db.getAllFromIndex('todos', 'deleted', 'false');
 }
 
-export async function setTodo(data) {
+export async function addTodo(data) {
+  const db = await initDB();
+  const tx = db.transaction('todos', 'readwrite');
+  return Promise.all([
+    await tx.store.put(data),
+    await tx.done
+  ])
+}
+
+export async function removeTodo(id) {
+  const db = await initDB();
+  const tx = db.transaction('todos', 'readwrite');
+  return Promise.all([
+    await tx.store.delete(id),
+    await tx.done
+  ])
+}
+
+export async function updateTodo(data) {
   const db = await initDB();
   const tx = db.transaction('todos', 'readwrite');
   return Promise.all([

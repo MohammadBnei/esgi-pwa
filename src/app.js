@@ -1,7 +1,8 @@
 import page from 'page';
 import { fetchTodos, syncTodos } from './api/todo.js';
-import { setTodos, getTodos } from './idb.js';
-import eventHandler from './eventHandler.js';
+import { setTodos, getTodos } from './localStorage/idb.js';
+import eventHandler from './event/eventHandler.js';
+import * as eventsConstants from './event/eventConstant.js';
 
 const app = document.querySelector('#app .outlet');
 
@@ -20,13 +21,14 @@ fetch('/config.json')
 
       let todos = [];
       if (navigator.onLine) {
+        await syncTodos()
         todos = await fetchTodos();
       } else {
         todos = await getTodos() || [];
       }
 
       homeView.todos = todos;
-      document.addEventListener('todo-updated', () => getTodos().then(todos => homeView.todos = todos))
+      window.addEventListener(eventsConstants.UPDATE_TODOS, () => getTodos().then(todos => homeView.todos = todos))
       displayPage('Home');
     });
 
@@ -43,6 +45,17 @@ function displayPage(page) {
   p.setAttribute('active', true);
 
   eventHandler()
+  eventLogger()
 }
 
-window.addEventListener('todos-updated', () => syncTodos())
+const eventLogger = () => {
+  for (const event of Object.values(eventsConstants)) {
+    window.addEventListener(event, ({ detail }) => console.log({ event, payload: detail }))
+  }
+}
+
+window.onbeforeunload = () => {
+  for (const event of Object.values(eventsConstants)) {
+    window.removeEventListener(event)
+  }
+}

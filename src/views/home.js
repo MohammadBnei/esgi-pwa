@@ -1,5 +1,7 @@
 import { render, html } from 'lit-html';
 import 'lit-icon';
+import { CREATE_TODO, UPDATE_TODO, DELETE_TODO } from '../event/eventConstant';
+import { syncTodos } from '../api/todo';
 
 export default class Home {
   constructor(page) {
@@ -32,6 +34,7 @@ export default class Home {
             <ul>
               ${this.properties.todos.map(todo => todoCard(todo))}
             </ul>
+            <button @click=${() => syncTodos()}>sync</button>
           </main>
         </div>
         <div class="mt-8" ?hidden="${!!this.properties.todos.length}">
@@ -74,7 +77,6 @@ export default class Home {
 
   handleForm(e) {
     e.preventDefault();
-    console.log(this.properties);
     if (this.properties.todo === '') return console.log('[todo] Value is required !!!');
     const todo = {
       id: Date.now(),
@@ -86,8 +88,7 @@ export default class Home {
       date: Date.now()
     };
 
-    const event = new CustomEvent('update-todos', { detail: [...this.properties.todos, todo] });
-    document.dispatchEvent(event);
+    this.addTodo(todo);
 
     // Clearing input
     this.properties.todo = null;
@@ -96,10 +97,25 @@ export default class Home {
 
     this.renderView();
   }
+
+  addTodo(todo) {
+    const event = new CustomEvent(CREATE_TODO, { detail: todo });
+    window.dispatchEvent(event);
+  }
 }
 
 const todoCard = todo => html`
   <div>
     <h1>${todo.title}</h1>
+    <p>${todo.description}</p>
+    <input type="checkbox" value=${todo.done} @click=${() => {
+    const updatedTodo = { ...todo, done: !todo.done, updated: 'true' }
+    const event = new CustomEvent(UPDATE_TODO, { detail: updatedTodo });
+    window.dispatchEvent(event);
+  }}>
+    <div @click=${() => {
+    const event = new CustomEvent(DELETE_TODO, { detail: todo.id });
+    window.dispatchEvent(event);
+  }}>X</div>
   </div>
 `

@@ -1,4 +1,5 @@
-import { getTodos } from "../idb";
+import { getTodos, addTodo as addTodoUnSync } from "../localStorage/idb";
+import { UPDATE_TODOS } from "../event/eventConstant";
 
 /**
  * 
@@ -19,41 +20,100 @@ export function fetchTodos() {
     })
 }
 
+export function addTodo(todo) {
+  const config = window.config;
+
+  if (!navigator.onLine) {
+    throw new Error('Can\'t add todo while the user is offline !')
+  }
+
+  return fetch(`${config.api}/todos`, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify(todo)
+  })
+}
+
+export function updateTodo(todo) {
+  const config = window.config;
+
+  if (!navigator.onLine) {
+    throw new Error('Can\'t update todo while the user is offline !')
+  }
+
+  return fetch(`${config.api}/todos/${todo.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify(todo)
+  })
+}
+
+export function deleteTodo(id) {
+  const config = window.config;
+
+  if (!navigator.onLine) {
+    throw new Error('Can\'t remove todo while the user is offline !')
+  }
+
+  return fetch(`${config.api}/todos/${id}`, {
+    method: 'DELETE'
+  })
+}
+
 export async function syncTodos() {
   const config = window.config;
 
   const localTodos = await getTodos()
 
   const localUnsyncedTodos = localTodos
-    .map((todo, index) => ({ todo, index }))
-    .filter(({ todo: { synced } }) => synced === "false")
+    .filter(({ synced, updated }) => synced === 'false' || updated === 'true')
+    .map(async todo => {
+      let url = `${config.api}/todos`
+      if (todo.updated === 'true') url = url + `/${todo.id}`
+      try {
+        todo.synced = 'true';
+        todo.updated = 'false';
 
-  console.log({ localUnsyncedTodos, localTodos });
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json'
+          },
+          body: JSON.stringify(todo)
+        })
 
-  if (!navigator.onLine || !localUnsyncedTodos.length) return localTodos;
-
-  const syncedTodos = localTodos?.filter(({ todo: { synced } }) => synced === "true")
-
-  for (const { todo, index } of localUnsyncedTodos) {
-    try {
-      const result = await fetch(`${config.api}/todos`, {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json'
-        },
-        body: JSON.stringify(todo)
-      })
-
-      syncedTodos[index] = {
-        ...(await result.json()),
-        synced: "true"
+        console.log(await res.json())
+        addTodoUnSync(await res.json())
+      } catch (error) {
+        console.error(error)
       }
+    })
 
-    } catch (error) {
-      console.error(error);
-      break;
-    }
+  const localDeletedTodos = localTodos
+    .filter(({ deleted }) => Boolean(deleted))
+    .map(async ({ id }) => {
+      try {
+        await fetch(`${config.api}/todos/${id}`, {
+          method: 'DELETE'
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    })
+
+  if (!navigator.onLine || (localUnsyncedTodos.length || localDeletedTodos.length));
+
+  await Promise.all([...localDeletedTodos, ...localUnsyncedTodos])
+
+  const todos = await fetchTodos()
+
+  for (const todo of todos) {
+    addTodoUnSync(todo)
   }
 
-  return syncedTodos
+  window.dispatchEvent(new CustomEvent(UPDATE_TODOS))
 }
