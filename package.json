@@ -7,7 +7,7 @@
     "database": "npx json-server --watch ./data/database.json -H 0.0.0.0",
     "serve": "npx es-dev-server --app-index index.html --node-resolve --watch -p 8080 -h 0.0.0.0",
     "css": "npx tailwindcss build ./assets/styles/tailwind-import.css -o ./assets/styles/tailwind.css",
-    "start": "npm run database & npm run serve & npm run css"
+    "start": "concurrently \"npm:database\" \"npm:serve\" \"npm:css\""
   },
   "keywords": [],
   "author": "",
@@ -15,7 +15,8 @@
   "devDependencies": {
     "es-dev-server": "^1.53.0",
     "json-server": "^0.16.1",
-    "tailwindcss": "^1.4.6"
+    "tailwindcss": "^1.4.6",
+    "concurrently": "*"
   },
   "dependencies": {
     "idb": "^5.0.4",
