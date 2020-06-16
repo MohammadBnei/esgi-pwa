@@ -50,7 +50,7 @@ self.addEventListener('fetch', function (event) {
                         })
                 })
                 .catch(function () {
-                    return cache.match('index.html');
+                    return caches.match('index.html');
                 })
         );
     }
